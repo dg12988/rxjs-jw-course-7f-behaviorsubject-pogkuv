@@ -1,4 +1,5 @@
-import { fromEvent, Subject } from "rxjs";
+import { BehaviorSubject, fromEvent, Subject } from "rxjs";
+import { withLatestFrom } from "rxjs/operators";
 
 const loggedInSpan: HTMLElement = document.querySelector('span#logged-in');
 const loginButton: HTMLElement = document.querySelector('button#login');
@@ -7,7 +8,8 @@ const printStateButton: HTMLElement = document.querySelector('button#print-state
 
 //Shows differences between Regular Subject and Behavior Subject. Shows login state
 
-const isLoggedIn$ = new Subject<boolean>();
+//Must provide BehaviorSubject Initial value
+const isLoggedIn$ = new BehaviorSubject<boolean>(false);
 
 fromEvent(loginButton, 'click').subscribe(() => isLoggedIn$.next(true));
 fromEvent(logoutButton, 'click').subscribe(() => isLoggedIn$.next(false));
@@ -22,3 +24,10 @@ isLoggedIn$.subscribe(isLoggedIn =>{
   logoutButton.style.display = isLoggedIn ? 'block' : 'none';
   loginButton.style.display = !isLoggedIn ? 'block' : 'none';
 });
+
+//select various pieces of state withLatestFrom
+fromEvent(printStateButton, 'click').pipe(
+  withLatestFrom(isLoggedIn$)
+).subscribe(
+  ([event, isLoggedIn]) => console.log('User is logged in:', isLoggedIn)
+);
